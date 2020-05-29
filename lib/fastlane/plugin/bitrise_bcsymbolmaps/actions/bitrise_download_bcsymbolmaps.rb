@@ -10,11 +10,14 @@ module Fastlane
     class BitriseDownloadBcsymbolmapsAction < Action
       API_VERSION = "v0.1"
 
+      Build = Struct.new(:build_number, :commit_hash)
+
       def self.run(params)
         build_response = bitrise_get_latest_build(params[:api_access_token], params[:app_slug], params[:branch], params[:status])
         return if build_response.code != "200"
         build_slug = get_build_slug(build_response)
-        build_number = get_build_number(build_response)
+        build_number = get_build_number(build_response).to_s
+        build_commit_hash = get_build_commit_hash(build_response)
 
         artifacts_response = bitrise_get_artifacts(params[:api_access_token], params[:app_slug], build_slug)
         return if artifacts_response.code != "200"
@@ -29,7 +32,7 @@ module Fastlane
         zip_path = download_file_with_prompt(artifact_link, build_number)
         extract_zip(zip_path)
 
-        build_number.to_s
+        Build.new(build_number, build_commit_hash)
       end
 
       def self.description
@@ -37,11 +40,11 @@ module Fastlane
       end
 
       def self.authors
-        ["sxua"]
+        ["Oleksandr Skrypnyk"]
       end
 
       def self.return_value
-        "Build number"
+        "Struct (build number, commit hash)"
       end
 
       def self.available_options
@@ -107,6 +110,10 @@ module Fastlane
 
       def self.get_build_number(response)
         get_latest_build(response)["build_number"]
+      end
+      
+      def self.get_build_commit_hash(response)
+        get_latest_build(response)["commit_hash"]
       end
 
       def self.bitrise_get_artifacts(token, app_slug, build_slug)
