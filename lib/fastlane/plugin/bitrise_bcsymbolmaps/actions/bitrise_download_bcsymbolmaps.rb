@@ -1,5 +1,4 @@
 require 'fastlane/action'
-require 'date'
 require 'json'
 require 'net/http'
 require 'uri'
@@ -101,7 +100,7 @@ module Fastlane
 
       def self.get_latest_build(response)
         json = JSON.parse(response.body)
-        json["data"].sort { |lhs, rhs| DateTime.parse(lhs["finished_at"]) <=> DateTime.parse(rhs["finished_at"]) }.first
+        json["data"].sort { |lhs, rhs| rhs["build_number"].to_i <=> lhs["build_number"].to_i }.first
       end
 
       def self.get_build_slug(response)
