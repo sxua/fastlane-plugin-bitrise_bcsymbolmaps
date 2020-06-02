@@ -1,3 +1,0 @@
-lane :test do
-  bitrise_download_bcsymbolmaps
-end

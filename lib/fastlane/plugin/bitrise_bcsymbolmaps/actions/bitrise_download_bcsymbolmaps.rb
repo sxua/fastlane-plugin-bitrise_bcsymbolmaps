@@ -35,7 +35,7 @@ module Fastlane
       end
 
       def self.description
-        "Download BCSymbolMaps from Bitrise before uploading them to a crash reporting tool."
+        "Downloads BCSymbolMaps from Bitrise before uploading them to a crash reporting tool."
       end
 
       def self.authors
