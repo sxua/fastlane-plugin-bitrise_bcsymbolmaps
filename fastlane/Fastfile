@@ -1,0 +1,45 @@
+default_platform(:ios)
+
+platform :ios do
+  lane :refresh_dsyms do |options|
+    build_number = ""
+    commit_hash = ""
+    version = ""
+
+    if options[:version]
+      version = options[:version]
+
+      build = bitrise_download_bcsymbolmaps(
+        api_access_token: ENV["BITRISE_TOKEN"],
+        app_slug: ENV["BITRISE_APP_SLUG"],
+        branch: "release/#{version}",
+        status: "1"
+      )
+      
+      build_number = build.build_number
+      commit_hash = build.commit_hash
+    end
+
+    download_dsyms(
+      version: version,
+      build_number: build_number,
+      app_identifier: ENV["APP_IDENTIFIER"]
+    )
+
+    send_build_to_bugsnag(
+      api_key: ENV["BUGSNAG_KEY"],
+      app_version: version,
+      ios_bundle_version: build_number,
+      repository: ENV["APP_REPO"],
+      revision: commit_hash
+    )
+
+    upload_symbols_to_bugsnag(
+      api_key: ENV["BUGSNAG_KEY"],
+      symbol_maps_path: File.join(Dir.pwd, "BCSymbolMaps")
+    )
+
+    clean_build_artifacts
+    bitrise_clean_bcsymbolmaps
+  end
+end

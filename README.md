@@ -12,27 +12,30 @@ fastlane add_plugin bitrise_bcsymbolmaps
 
 ## About bitrise_bcsymbolmaps
 
-Download BCSymbolMaps from Bitrise
-
-**Note to author:** Add a more detailed description about this plugin here. If your plugin contains multiple actions, make sure to mention them here.
+Download BCSymbolMaps from Bitrise before uploading them to a crash reporting tool.
 
 ## Example
 
-Check out the [example `Fastfile`](fastlane/Fastfile) to see how to use this plugin. Try it by cloning the repo, running `fastlane install_plugins` and `bundle exec fastlane test`.
+Check out the [example `Fastfile`](fastlane/Fastfile) to see how to use this plugin. Try it by cloning the repo, running `fastlane install_plugins`.
 
-**Note to author:** Please set up a sample project to make it easy for users to explore what your plugin does. Provide everything that is necessary to try out the plugin in this project (including a sample Xcode/Android project if necessary)
+In order to download bitcode symbol maps, provide a Personal Access Token from Bitrise as well as a app slug (last segment of the app URL).
+We're assuming that release builds are coming from `release/*` branches (thanks to [Gitflow](https://nvie.com/posts/a-successful-git-branching-model/)) and we only need successful builds (`status: "1"`).
 
-## Run tests for this plugin
-
-To run both the tests, and code style validation, run
-
+```ruby
+build = bitrise_download_bcsymbolmaps(
+  api_access_token: ENV["BITRISE_TOKEN"],
+  app_slug: ENV["BITRISE_APP_SLUG"],
+  branch: "release/#{version}",
+  status: "1"
+)
 ```
-rake
-```
 
-To automatically fix many of the styling issues, use
-```
-rubocop -a
+This will return an object with two attributes: `build_number` and `commit_hash`. Having this information is sufficient to [download dSYMs from AppStore Connect](fastlane/Fastfile#L23-L27) and [create a release on Bugsnag](fastlane/Fastfile#L29-L34).
+
+After all the operations are done, you might want to cleanup a work directory.
+
+```ruby
+bitrise_clean_bcsymbolmaps
 ```
 
 ## Issues and Feedback
